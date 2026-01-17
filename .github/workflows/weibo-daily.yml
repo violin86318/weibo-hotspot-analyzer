@@ -62,8 +62,13 @@ jobs:
         run: |
           REPORT_FILE=$(ls -t weibo_hotspot_report_*.html 2>/dev/null | head -1)
           if [ -n "$REPORT_FILE" ]; then
-            cp "$REPORT_FILE" "reports/$(date +%Y/%m)/$(date +%Y-%m-%d)_weibo_hotspot_report.html"
-            echo "✅ 报告已复制到: reports/$(date +%Y/%m)/$(date +%Y-%m-%d)_weibo_hotspot_report.html"
+            # 使用时间戳避免覆盖：2026-01-18_220000
+            TIMESTAMP=$(date +%Y-%m-%d_%H%M%S)
+            cp "$REPORT_FILE" "reports/$(date +%Y/%m)/${TIMESTAMP}_weibo_hotspot_report.html"
+            echo "✅ 报告已复制到: reports/$(date +%Y/%m)/${TIMESTAMP}_weibo_hotspot_report.html"
+
+            # 同时创建一个 latest 副本（方便访问最新报告）
+            cp "$REPORT_FILE" "reports/$(date +%Y/%m)/latest_weibo_hotspot_report.html"
           else
             echo "❌ 未找到生成的报告文件"
             exit 1
@@ -81,18 +86,22 @@ jobs:
       - name: 准备 Pages 部署
         run: |
           mkdir -p pages
-          
-          # 复制最新报告到 pages 根目录（作为首页）
-          LATEST_REPORT=$(find reports -name "*.html" -type f | sort -r | head -1)
+
+          # 优先使用 latest 副本作为首页（如果有）
+          LATEST_REPORT=$(find reports -name "latest_weibo_hotspot_report.html" -type f | sort -r | head -1)
+
+          # 如果没有 latest，使用最新的时间戳报告
+          if [ -z "$LATEST_REPORT" ]; then
+            LATEST_REPORT=$(find reports -name "*_weibo_hotspot_report.html" -type f ! -name "latest_*" | sort -r | head -1)
+          fi
+
           if [ -n "$LATEST_REPORT" ]; then
             cp "$LATEST_REPORT" pages/index.html
+            echo "✅ 首页更新为: $LATEST_REPORT"
           fi
-          
+
           # 复制所有历史报告
           cp -r reports/* pages/ 2>/dev/null || true
-          
-          # 生成报告列表页面
-          python scripts/generate_reports_list.py
 
       - name: 上传到 GitHub Pages
         uses: actions/upload-pages-artifact@v3
