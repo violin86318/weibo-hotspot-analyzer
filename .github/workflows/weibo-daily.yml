@@ -83,7 +83,7 @@ jobs:
           mkdir -p pages
           
           # 复制最新报告到 pages 根目录（作为首页）
-          LATEST_REPORT=$(ls -t reports/*/*/*.html 2>/dev/null | head -1)
+          LATEST_REPORT=$(find reports -name "*.html" -type f | sort -r | head -1)
           if [ -n "$LATEST_REPORT" ]; then
             cp "$LATEST_REPORT" pages/index.html
           fi
@@ -182,14 +182,15 @@ HTMLEOF
 
           # 列出所有报告
           find pages -name "*.html" -type f ! -name "index.html" ! -name "reports.html" | sort -r | head -30 | while read report; do
-            filename=$(basename "$report" .html)
-            date=$(echo "$filename" | sed 's/_weibo_hotspot_report//')
+            filename=$(basename "$report")
+            relative_path=$(echo "$report" | sed 's|pages/||')
+            date=$(echo "$filename" | sed 's/_weibo_hotspot_report.html//')
             
             cat >> pages/reports.html << HTMLEOF
             <div class="report-card">
                 <h3>📅 $date</h3>
                 <p>微博热搜产品创意分析报告</p>
-                <a href="$filename">查看报告 →</a>
+                <a href="$relative_path">查看报告 →</a>
             </div>
 HTMLEOF
           done
