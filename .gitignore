@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# 虚拟环境
+venv/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 日志文件
+logs/*.log
+*.log
+
+# 数据文件（每次生成新的）
+weibo_hotspots_*.json
+weibo_ideas_*.json
+*.json.bak
+
+# 生成的 HTML 报告（在 GitHub Actions 中会提交到 reports/ 目录）
+weibo_hotspot_report_*.html
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# 临时文件
+*.tmp
+*.temp
+.latest_ideas
+
+# 测试文件
+test_*.py
+*_test.py

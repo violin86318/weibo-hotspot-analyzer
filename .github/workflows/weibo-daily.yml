@@ -1,0 +1,78 @@
+name: 微博热搜每日分析
+
+on:
+  schedule:
+    # 每天 UTC 14:00 执行 (北京时间 22:00)
+    - cron: '0 14 * * *'
+  workflow_dispatch: # 支持手动触发
+
+permissions:
+  contents: write
+
+jobs:
+  weibo-analysis:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 设置 Python 环境
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 安装依赖
+        run: |
+          python -m pip install --upgrade pip
+
+      - name: 抓取微博热搜
+        env:
+          TIANAPI_KEY: ${{ secrets.TIANAPI_KEY }}
+        run: |
+          python scripts/fetch_weibo_hot.py
+
+      - name: Claude AI 分析创意
+        env:
+          API_ENDPOINT: ${{ secrets.API_ENDPOINT }}
+          API_KEY: ${{ secrets.API_KEY }}
+          API_MODEL: ${{ secrets.API_MODEL }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          python scripts/claude_analysis.py
+
+      - name: 生成 HTML 报告
+        run: |
+          python scripts/generate_html_report.py
+
+      - name: 创建输出目录
+        run: |
+          mkdir -p reports/$(date +%Y/%m)
+
+      - name: 移动报告到输出目录
+        run: |
+          REPORT_FILE=$(ls -t weibo_hotspot_report_*.html 2>/dev/null | head -1)
+          if [ -n "$REPORT_FILE" ]; then
+            mv "$REPORT_FILE" "reports/$(date +%Y/%m)/$(date +%Y-%m-%d)_weibo_hotspot_report.html"
+            echo "✅ 报告已移动到: reports/$(date +%Y/%m)/$(date +%Y-%m-%d)_weibo_hotspot_report.html"
+          else
+            echo "❌ 未找到生成的报告文件"
+            exit 1
+          fi
+
+      - name: 提交报告
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add reports/
+          git diff --staged --quiet || git commit -m "🤖 自动生成微博热搜报告 $(date +%Y-%m-%d)"
+          git push
+
+      - name: 上传报告作为构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: weibo-hotspot-report-${{ github.run_number }}
+          path: reports/${{ github.run_number }}/*.html
+          retention-days: 30

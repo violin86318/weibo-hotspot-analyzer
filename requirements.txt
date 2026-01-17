@@ -1,0 +1,11 @@
+# Python 依赖包
+# 安装: pip install -r requirements.txt
+
+# Anthropic Claude SDK
+anthropic>=0.18.0
+
+# HTTP 请求 (可选，脚本使用标准库)
+# requests>=2.31.0
+
+# 数据处理 (可选)
+# pandas>=2.0.0
