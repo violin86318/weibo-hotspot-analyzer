@@ -605,7 +605,7 @@ class HTMLReportGenerator:
 
     def _generate_statistics_section(self, stats: Dict) -> str:
         """生成统计部分"""
-        html = '''
+        html = f'''
         <div class="statistics">
             <h2>📈 数据统计</h2>
             <div class="stat-grid">

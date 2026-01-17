@@ -105,6 +105,159 @@ jobs:
           # 复制所有历史报告
           cp -r reports/* pages/ 2>/dev/null || true
 
+          # 生成历史报告列表页面
+          echo "📋 生成历史报告列表页面..."
+          cat > pages/reports.html << 'HTMLEOF'
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>历史报告列表 - 微博热搜产品创意分析</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #FF6B35, #FF8C42);
+            color: #2D3142;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 32px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+        }
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 16px;
+            color: #FF6B35;
+        }
+        .header p {
+            font-size: 16px;
+            color: #666;
+        }
+        .nav-buttons {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .nav-buttons a {
+            display: inline-block;
+            margin: 0 10px;
+            padding: 10px 20px;
+            background: #FF6B35;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .nav-buttons a:hover {
+            background: #FF8C42;
+        }
+        .reports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .report-card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+        .report-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        }
+        .report-card h3 {
+            color: #FF6B35;
+            margin-bottom: 12px;
+            font-size: 18px;
+        }
+        .report-card .time {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        .report-card a {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 8px 16px;
+            background: #FF6B35;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .report-card a:hover {
+            background: #FF8C42;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: white;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 微博热搜历史报告列表</h1>
+            <p>所有生成的产品创意分析报告 - 按时间倒序排列</p>
+            <div class="nav-buttons">
+                <a href="/">← 返回首页（最新报告）</a>
+            </div>
+        </div>
+        <div class="reports-grid">
+HTMLEOF
+
+          # 列出所有报告（按时间倒序，最新的在前）
+          find pages -name "*_weibo_hotspot_report.html" -type f ! -name "latest_*" | sort -r | head -50 | while read report; do
+            filename=$(basename "$report" .html)
+            # 提取日期和时间
+            if [[ $filename =~ ([0-9]{4}-[0-9]{2}-[0-9]{2})_([0-9]{6}) ]]; then
+              date="${BASH_REMATCH[1]}"
+              time="${BASH_REMATCH[2]}"
+              # 格式化时间
+              formatted_time="${time:0:2}:${time:2:2}"
+            else
+              date=$(echo "$filename" | sed 's/_weibo_hotspot_report//')
+              time=""
+            fi
+
+            cat >> pages/reports.html << HTMLEOF
+            <div class="report-card">
+                <h3>📅 $date</h3>
+                <p class="time">⏰ $formatted_time</p>
+                <p>微博热搜产品创意分析报告</p>
+                <a href="$filename">查看报告 →</a>
+            </div>
+HTMLEOF
+          done
+
+          cat >> pages/reports.html << 'HTMLEOF
+        </div>
+        <div class="footer">
+            <p>自动生成时间: $(date '+%Y-%m-%d %H:%M:%S')</p>
+            <p>Powered by Claude AI & GitHub Actions</p>
+        </div>
+    </div>
+</body>
+</html>
+HTMLEOF
+
+          echo "✅ 历史报告列表页面已生成"
+
       - name: 上传到 GitHub Pages
         uses: actions/upload-pages-artifact@v3
         with:
