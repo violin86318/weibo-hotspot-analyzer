@@ -2,6 +2,8 @@ name: 微博热搜每日分析
 
 on:
   schedule:
+    # 每天 UTC 02:00 执行 (北京时间 10:00)
+    - cron: '0 2 * * *'
     # 每天 UTC 14:00 执行 (北京时间 22:00)
     - cron: '0 14 * * *'
   workflow_dispatch: # 支持手动触发
