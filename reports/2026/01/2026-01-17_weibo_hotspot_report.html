@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微博热搜产品创意分析报告 - 2026年01月17日</title>
+    <style>
+        :root {
+            --primary-color: #FF6B35;
+            --secondary-color: #FF8C42;
+            --accent-excellent: #FFD23F;
+            --accent-good: #06A77D;
+            --accent-normal: #6C757D;
+            --bg-color: #FFF8F0;
+            --text-color: #2D3142;
+            --card-bg: #FFFFFF;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .report-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 32px;
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+        }
+
+        .report-header h1 {
+            font-size: 32px;
+            margin-bottom: 16px;
+            font-weight: 700;
+        }
+
+        .meta-info {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .meta-info span {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            border-left: 4px solid var(--primary-color);
+            padding-left: 12px;
+            margin-top: 32px;
+        }
+
+        .hotspot-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .hotspot-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .hotspot-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        }
+
+        .hotspot-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .rank {
+            background: var(--primary-color);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .hotword {
+            font-weight: 600;
+            font-size: 16px;
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .hotness {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .tag {
+            background: var(--primary-color);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .hotspot-detail {
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-bottom: 24px;
+        }
+
+        .hotspot-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .idea-card {
+            background: var(--bg-color);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border-left: 5px solid #E0E0E0;
+            transition: all 0.2s;
+        }
+
+        .idea-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .idea-card.excellent {
+            border-left-color: var(--accent-excellent);
+            background: linear-gradient(to right, rgba(255, 210, 63, 0.1), transparent);
+        }
+
+        .idea-card.good {
+            border-left-color: var(--accent-good);
+            background: linear-gradient(to right, rgba(6, 167, 125, 0.05), transparent);
+        }
+
+        .idea-card.normal {
+            border-left-color: var(--accent-normal);
+        }
+
+        .idea-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .idea-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .score-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .score {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge.excellent {
+            background: var(--accent-excellent);
+            color: #333;
+        }
+
+        .badge.good {
+            background: var(--accent-good);
+            color: white;
+        }
+
+        .badge.normal {
+            background: var(--accent-normal);
+            color: white;
+        }
+
+        .idea-body p {
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .idea-body strong {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .idea-body ul {
+            margin-left: 20px;
+            margin-bottom: 12px;
+        }
+
+        .idea-body li {
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+
+        .score-breakdown {
+            font-size: 13px;
+            color: #666;
+            font-style: italic;
+        }
+
+        .statistics {
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            color: white;
+            padding: 32px;
+            border-radius: 16px;
+            margin-bottom: 32px;
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+        }
+
+        .statistics h2 {
+            color: white;
+            border-left-color: white;
+            margin-top: 0;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .ranking-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .ranking-item {
+            background: var(--card-bg);
+            padding: 16px 20px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .ranking-rank {
+            font-size: 24px;
+            font-weight: 700;
+            width: 40px;
+            text-align: center;
+        }
+
+        .ranking-rank.gold { color: #FFD700; }
+        .ranking-rank.silver { color: #C0C0C0; }
+        .ranking-rank.bronze { color: #CD7F32; }
+
+        .ranking-info {
+            flex: 1;
+        }
+
+        .ranking-name {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .ranking-hotword {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .ranking-score {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 32px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .report-header { padding: 24px; }
+            .report-header h1 { font-size: 24px; }
+            .hotspot-list { grid-template-columns: 1fr; }
+            .idea-header { flex-direction: column; align-items: flex-start; }
+            .stat-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="report-header">
+            <h1>🤖 微博热搜产品创意分析报告</h1>
+            <div class="meta-info">
+                <span>📅 生成日期：2026-01-17</span>
+                <span>🔥 热搜总数：3</span>
+                <span>💡 创意总数：10</span>
+                <span>⏰ 生成时间：2026-01-17 19:22:01</span>
+            </div>
+        </header>
+
+        <h2>📊 热搜TOP10概览</h2>
+        <div class="hotspot-list">
+
+            <div class="hotspot-card">
+                <div class="hotspot-header">
+                    <span class="rank">1</span>
+                    <span class="hotword">轧戏</span>
+                </div>
+                <div class="hotness">热度：剧集 96094 </div>
+            </div>
+
+            <div class="hotspot-card">
+                <div class="hotspot-header">
+                    <span class="rank">2</span>
+                    <span class="hotword">涨20元月薪公司已连续37年涨薪</span>
+                </div>
+                <div class="hotness">热度：92490 <span class="tag">热</span></div>
+            </div>
+
+            <div class="hotspot-card">
+                <div class="hotspot-header">
+                    <span class="rank">3</span>
+                    <span class="hotword">冰雪热力中的中国经济新脉动</span>
+                </div>
+                <div class="hotness">热度：85517 </div>
+            </div>
+
+            <div class="hotspot-card">
+                <div class="hotspot-header">
+                    <span class="rank">4</span>
+                    <span class="hotword">男孩凌晨5点起床写作业突然晕倒</span>
+                </div>
+                <div class="hotness">热度：83383 </div>
+            </div>
+
+            <div class="hotspot-card">
+                <div class="hotspot-header">
+                    <span class="rank">5</span>
+                    <span class="hotword">王鹤棣演唱会</span>
+                </div>
+                <div class="hotness">热度：演出 83310 </div>
+            </div>
+
+            <div class="hotspot-card">
+                <div class="hotspot-header">
+                    <span class="rank">6</span>
+                    <span class="hotword">米兰男装周</span>
+                </div>
+                <div class="hotness">热度：81238 <span class="tag">热</span></div>
+            </div>
+
+            <div class="hotspot-card">
+                <div class="hotspot-header">
+                    <span class="rank">7</span>
+                    <span class="hotword">U23国足首进亚洲杯4强</span>
+                </div>
+                <div class="hotness">热度：48767 </div>
+            </div>
+
+            <div class="hotspot-card">
+                <div class="hotspot-header">
+                    <span class="rank">8</span>
+                    <span class="hotword">卸妆油洗头</span>
+                </div>
+                <div class="hotness">热度：40057 </div>
+            </div>
+
+            <div class="hotspot-card">
+                <div class="hotspot-header">
+                    <span class="rank">9</span>
+                    <span class="hotword">杨幂鹿晗我是证人登顶</span>
+                </div>
+                <div class="hotness">热度：电影 38581 </div>
+            </div>
+
+            <div class="hotspot-card">
+                <div class="hotspot-header">
+                    <span class="rank">10</span>
+                    <span class="hotword">肖稚宇胡羞在一起了</span>
+                </div>
+                <div class="hotness">热度：剧集 38461 <span class="tag">沸</span></div>
+            </div>
+
+        </div>
+
+        <h2>🔍 详细产品创意分析</h2>
+
+        <div class="hotspot-detail">
+            <div class="hotspot-title">
+                <span class="rank">1</span>
+                <span class="hotword" style="font-size: 18px;">轧戏</span>
+            </div>
+            <p><strong>🔥 热度指数：</strong>96,094</p>
+            <div class="product-ideas">
+
+                <div class="idea-card normal">
+                    <div class="idea-header">
+                        <span class="idea-name">「轧戏」分析失败</span>
+                        <div class="score-info">
+                            <span class="score">0分</span>
+                            <span class="badge normal">普通</span>
+                        </div>
+                    </div>
+                    <div class="idea-body">
+                        <p><strong>💎 核心功能：</strong></p>
+                        <ul>
+                            <li>错误: API 调用失败 (HTTP 500): {"error":"当前无可用凭证"}</li>
+                        </ul>
+                        <p><strong>👥 目标用户：</strong>无法生成</p>
+                        <p><strong>📝 产品描述：</strong>API 调用失败: API 调用失败 (HTTP 500): {"error":"当前无可用凭证"}</p>
+                        <p class="score-breakdown">
+                            评分：有趣度 0分 × 80% + 有用度 0分 × 20%
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="hotspot-detail">
+            <div class="hotspot-title">
+                <span class="rank">2</span>
+                <span class="hotword" style="font-size: 18px;">涨20元月薪公司已连续37年涨薪 <span class="tag">热</span></span>
+            </div>
+            <p><strong>🔥 热度指数：</strong>92,490</p>
+            <div class="product-ideas">
+
+                <div class="idea-card normal">
+                    <div class="idea-header">
+                        <span class="idea-name">「涨20元月薪公司已连续37年涨薪」分析失败</span>
+                        <div class="score-info">
+                            <span class="score">0分</span>
+                            <span class="badge normal">普通</span>
+                        </div>
+                    </div>
+                    <div class="idea-body">
+                        <p><strong>💎 核心功能：</strong></p>
+                        <ul>
+                            <li>错误: API 调用失败 (HTTP 500): {"error":"当前无可用凭证"}</li>
+                        </ul>
+                        <p><strong>👥 目标用户：</strong>无法生成</p>
+                        <p><strong>📝 产品描述：</strong>API 调用失败: API 调用失败 (HTTP 500): {"error":"当前无可用凭证"}</p>
+                        <p class="score-breakdown">
+                            评分：有趣度 0分 × 80% + 有用度 0分 × 20%
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="hotspot-detail">
+            <div class="hotspot-title">
+                <span class="rank">3</span>
+                <span class="hotword" style="font-size: 18px;">冰雪热力中的中国经济新脉动</span>
+            </div>
+            <p><strong>🔥 热度指数：</strong>85,517</p>
+            <div class="product-ideas">
+
+                <div class="idea-card normal">
+                    <div class="idea-header">
+                        <span class="idea-name">「冰雪热力中的中国经济新脉动」分析失败</span>
+                        <div class="score-info">
+                            <span class="score">0分</span>
+                            <span class="badge normal">普通</span>
+                        </div>
+                    </div>
+                    <div class="idea-body">
+                        <p><strong>💎 核心功能：</strong></p>
+                        <ul>
+                            <li>错误: API 调用失败 (HTTP 500): {"error":"当前无可用凭证"}</li>
+                        </ul>
+                        <p><strong>👥 目标用户：</strong>无法生成</p>
+                        <p><strong>📝 产品描述：</strong>API 调用失败: API 调用失败 (HTTP 500): {"error":"当前无可用凭证"}</p>
+                        <p class="score-breakdown">
+                            评分：有趣度 0分 × 80% + 有用度 0分 × 20%
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="hotspot-detail">
+            <div class="hotspot-title">
+                <span class="rank">4</span>
+                <span class="hotword" style="font-size: 18px;">男孩凌晨5点起床写作业突然晕倒</span>
+            </div>
+            <p><strong>🔥 热度指数：</strong>83,383</p>
+            <div class="product-ideas">
+
+                <div class="idea-card normal">
+                    <div class="idea-header">
+                        <span class="idea-name">「男孩凌晨5点起床写作业突然晕倒」分析失败</span>
+                        <div class="score-info">
+                            <span class="score">0分</span>
+                            <span class="badge normal">普通</span>
+                        </div>
+                    </div>
+                    <div class="idea-body">
+                        <p><strong>💎 核心功能：</strong></p>
+                        <ul>
+                            <li>错误: API 调用失败 (HTTP 500): {"error":"当前无可用凭证"}</li>
+                        </ul>
+                        <p><strong>👥 目标用户：</strong>无法生成</p>
+                        <p><strong>📝 产品描述：</strong>API 调用失败: API 调用失败 (HTTP 500): {"error":"当前无可用凭证"}</p>
+                        <p class="score-breakdown">
+                            评分：有趣度 0分 × 80% + 有用度 0分 × 20%
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="hotspot-detail">
+            <div class="hotspot-title">
+                <span class="rank">5</span>
+                <span class="hotword" style="font-size: 18px;">王鹤棣演唱会</span>
+            </div>
+            <p><strong>🔥 热度指数：</strong>83,310</p>
+            <div class="product-ideas">
+
+                <div class="idea-card normal">
+                    <div class="idea-header">
+                        <span class="idea-name">「王鹤棣演唱会」分析失败</span>
+                        <div class="score-info">
+                            <span class="score">0分</span>
+                            <span class="badge normal">普通</span>
+                        </div>
+                    </div>
+                    <div class="idea-body">
+                        <p><strong>💎 核心功能：</strong></p>
+                        <ul>
+                            <li>错误: API 调用失败 (HTTP 500): {"error":"当前无可用凭证"}</li>
+                        </ul>
+                        <p><strong>👥 目标用户：</strong>无法生成</p>
+                        <p><strong>📝 产品描述：</strong>API 调用失败: API 调用失败 (HTTP 500): {"error":"当前无可用凭证"}</p>
+                        <p class="score-breakdown">
+                            评分：有趣度 0分 × 80% + 有用度 0分 × 20%
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="hotspot-detail">
+            <div class="hotspot-title">
+                <span class="rank">6</span>
+                <span class="hotword" style="font-size: 18px;">米兰男装周 <span class="tag">热</span></span>
+            </div>
+            <p><strong>🔥 热度指数：</strong>81,238</p>
+            <div class="product-ideas">
+
+                <div class="idea-card normal">
+                    <div class="idea-header">
+                        <span class="idea-name">「米兰男装周」分析失败</span>
+                        <div class="score-info">
+                            <span class="score">0分</span>
+                            <span class="badge normal">普通</span>
+                        </div>
+                    </div>
+                    <div class="idea-body">
+                        <p><strong>💎 核心功能：</strong></p>
+                        <ul>
+                            <li>错误: API 调用失败 (HTTP 500): {"error":"当前无可用凭证"}</li>
+                        </ul>
+                        <p><strong>👥 目标用户：</strong>无法生成</p>
+                        <p><strong>📝 产品描述：</strong>API 调用失败: API 调用失败 (HTTP 500): {"error":"当前无可用凭证"}</p>
+                        <p class="score-breakdown">
+                            评分：有趣度 0分 × 80% + 有用度 0分 × 20%
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="hotspot-detail">
+            <div class="hotspot-title">
+                <span class="rank">7</span>
+                <span class="hotword" style="font-size: 18px;">U23国足首进亚洲杯4强</span>
+            </div>
+            <p><strong>🔥 热度指数：</strong>48,767</p>
+            <div class="product-ideas">
+
+                <div class="idea-card normal">
+                    <div class="idea-header">
+                        <span class="idea-name">「U23国足首进亚洲杯4强」分析失败</span>
+                        <div class="score-info">
+                            <span class="score">0分</span>
+                            <span class="badge normal">普通</span>
+                        </div>
+                    </div>
+                    <div class="idea-body">
+                        <p><strong>💎 核心功能：</strong></p>
+                        <ul>
+                            <li>错误: API 调用失败 (HTTP 500): {"error":"当前无可用凭证"}</li>
+                        </ul>
+                        <p><strong>👥 目标用户：</strong>无法生成</p>
+                        <p><strong>📝 产品描述：</strong>API 调用失败: API 调用失败 (HTTP 500): {"error":"当前无可用凭证"}</p>
+                        <p class="score-breakdown">
+                            评分：有趣度 0分 × 80% + 有用度 0分 × 20%
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="hotspot-detail">
+            <div class="hotspot-title">
+                <span class="rank">8</span>
+                <span class="hotword" style="font-size: 18px;">卸妆油洗头</span>
+            </div>
+            <p><strong>🔥 热度指数：</strong>40,057</p>
+            <div class="product-ideas">
+
+                <div class="idea-card normal">
+                    <div class="idea-header">
+                        <span class="idea-name">「卸妆油洗头」分析失败</span>
+                        <div class="score-info">
+                            <span class="score">0分</span>
+                            <span class="badge normal">普通</span>
+                        </div>
+                    </div>
+                    <div class="idea-body">
+                        <p><strong>💎 核心功能：</strong></p>
+                        <ul>
+                            <li>错误: API 调用失败 (HTTP 500): {"error":"当前无可用凭证"}</li>
+                        </ul>
+                        <p><strong>👥 目标用户：</strong>无法生成</p>
+                        <p><strong>📝 产品描述：</strong>API 调用失败: API 调用失败 (HTTP 500): {"error":"当前无可用凭证"}</p>
+                        <p class="score-breakdown">
+                            评分：有趣度 0分 × 80% + 有用度 0分 × 20%
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="hotspot-detail">
+            <div class="hotspot-title">
+                <span class="rank">9</span>
+                <span class="hotword" style="font-size: 18px;">杨幂鹿晗我是证人登顶</span>
+            </div>
+            <p><strong>🔥 热度指数：</strong>38,581</p>
+            <div class="product-ideas">
+
+                <div class="idea-card normal">
+                    <div class="idea-header">
+                        <span class="idea-name">「杨幂鹿晗我是证人登顶」分析失败</span>
+                        <div class="score-info">
+                            <span class="score">0分</span>
+                            <span class="badge normal">普通</span>
+                        </div>
+                    </div>
+                    <div class="idea-body">
+                        <p><strong>💎 核心功能：</strong></p>
+                        <ul>
+                            <li>错误: API 调用失败 (HTTP 500): {"error":"当前无可用凭证"}</li>
+                        </ul>
+                        <p><strong>👥 目标用户：</strong>无法生成</p>
+                        <p><strong>📝 产品描述：</strong>API 调用失败: API 调用失败 (HTTP 500): {"error":"当前无可用凭证"}</p>
+                        <p class="score-breakdown">
+                            评分：有趣度 0分 × 80% + 有用度 0分 × 20%
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="hotspot-detail">
+            <div class="hotspot-title">
+                <span class="rank">10</span>
+                <span class="hotword" style="font-size: 18px;">肖稚宇胡羞在一起了 <span class="tag">沸</span></span>
+            </div>
+            <p><strong>🔥 热度指数：</strong>38,461</p>
+            <div class="product-ideas">
+
+                <div class="idea-card normal">
+                    <div class="idea-header">
+                        <span class="idea-name">「肖稚宇胡羞在一起了」分析失败</span>
+                        <div class="score-info">
+                            <span class="score">0分</span>
+                            <span class="badge normal">普通</span>
+                        </div>
+                    </div>
+                    <div class="idea-body">
+                        <p><strong>💎 核心功能：</strong></p>
+                        <ul>
+                            <li>错误: API 调用失败 (HTTP 500): {"error":"当前无可用凭证"}</li>
+                        </ul>
+                        <p><strong>👥 目标用户：</strong>无法生成</p>
+                        <p><strong>📝 产品描述：</strong>API 调用失败: API 调用失败 (HTTP 500): {"error":"当前无可用凭证"}</p>
+                        <p class="score-breakdown">
+                            评分：有趣度 0分 × 80% + 有用度 0分 × 20%
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <h2>🏆 产品创意排行榜 (TOP20)</h2>
+        <div class="ranking-list">
+
+            <div class="ranking-item">
+                <span class="ranking-rank gold">#1</span>
+                <div class="ranking-info">
+                    <div class="ranking-name">「轧戏」分析失败</div>
+                    <div class="ranking-hotword">来源：轧戏</div>
+                </div>
+                <span class="ranking-score">0分</span>
+            </div>
+
+            <div class="ranking-item">
+                <span class="ranking-rank silver">#2</span>
+                <div class="ranking-info">
+                    <div class="ranking-name">「涨20元月薪公司已连续37年涨薪」分析失败</div>
+                    <div class="ranking-hotword">来源：涨20元月薪公司已连续37年涨薪</div>
+                </div>
+                <span class="ranking-score">0分</span>
+            </div>
+
+            <div class="ranking-item">
+                <span class="ranking-rank bronze">#3</span>
+                <div class="ranking-info">
+                    <div class="ranking-name">「冰雪热力中的中国经济新脉动」分析失败</div>
+                    <div class="ranking-hotword">来源：冰雪热力中的中国经济新脉动</div>
+                </div>
+                <span class="ranking-score">0分</span>
+            </div>
+
+            <div class="ranking-item">
+                <span class="ranking-rank ">4</span>
+                <div class="ranking-info">
+                    <div class="ranking-name">「男孩凌晨5点起床写作业突然晕倒」分析失败</div>
+                    <div class="ranking-hotword">来源：男孩凌晨5点起床写作业突然晕倒</div>
+                </div>
+                <span class="ranking-score">0分</span>
+            </div>
+
+            <div class="ranking-item">
+                <span class="ranking-rank ">5</span>
+                <div class="ranking-info">
+                    <div class="ranking-name">「王鹤棣演唱会」分析失败</div>
+                    <div class="ranking-hotword">来源：王鹤棣演唱会</div>
+                </div>
+                <span class="ranking-score">0分</span>
+            </div>
+
+            <div class="ranking-item">
+                <span class="ranking-rank ">6</span>
+                <div class="ranking-info">
+                    <div class="ranking-name">「米兰男装周」分析失败</div>
+                    <div class="ranking-hotword">来源：米兰男装周</div>
+                </div>
+                <span class="ranking-score">0分</span>
+            </div>
+
+            <div class="ranking-item">
+                <span class="ranking-rank ">7</span>
+                <div class="ranking-info">
+                    <div class="ranking-name">「U23国足首进亚洲杯4强」分析失败</div>
+                    <div class="ranking-hotword">来源：U23国足首进亚洲杯4强</div>
+                </div>
+                <span class="ranking-score">0分</span>
+            </div>
+
+            <div class="ranking-item">
+                <span class="ranking-rank ">8</span>
+                <div class="ranking-info">
+                    <div class="ranking-name">「卸妆油洗头」分析失败</div>
+                    <div class="ranking-hotword">来源：卸妆油洗头</div>
+                </div>
+                <span class="ranking-score">0分</span>
+            </div>
+
+            <div class="ranking-item">
+                <span class="ranking-rank ">9</span>
+                <div class="ranking-info">
+                    <div class="ranking-name">「杨幂鹿晗我是证人登顶」分析失败</div>
+                    <div class="ranking-hotword">来源：杨幂鹿晗我是证人登顶</div>
+                </div>
+                <span class="ranking-score">0分</span>
+            </div>
+
+            <div class="ranking-item">
+                <span class="ranking-rank ">10</span>
+                <div class="ranking-info">
+                    <div class="ranking-name">「肖稚宇胡羞在一起了」分析失败</div>
+                    <div class="ranking-hotword">来源：肖稚宇胡羞在一起了</div>
+                </div>
+                <span class="ranking-score">0分</span>
+            </div>
+
+        </div>
+
+        <div class="statistics">
+            <h2>📈 数据统计</h2>
+            <div class="stat-grid">
+                <div class="stat-item">
+                    <span class="stat-value">{stats.get('total', 0)}</span>
+                    <span class="stat-label">创意总数</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">{stats.get('excellent', 0)}</span>
+                    <span class="stat-label">优秀创意 (&gt;80分)</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">{stats.get('good', 0)}</span>
+                    <span class="stat-label">良好创意 (60-80分)</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">{stats.get('avg_score', 0):.1f}</span>
+                    <span class="stat-label">平均评分</span>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>🤖 本报告由 AI 自动生成 | 仅供参考</p>
+            <p>数据来源：天聚数行 API | AI 分析：Claude 3.5 Sonnet</p>
+            <p>生成时间：2026-01-17 19:22:01</p>
+        </footer>
+    </div>
+</body>
+</html>
