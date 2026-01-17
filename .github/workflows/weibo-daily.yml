@@ -8,6 +8,13 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
+
+# 并发控制
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
   weibo-analysis:
@@ -55,8 +62,8 @@ jobs:
         run: |
           REPORT_FILE=$(ls -t weibo_hotspot_report_*.html 2>/dev/null | head -1)
           if [ -n "$REPORT_FILE" ]; then
-            mv "$REPORT_FILE" "reports/$(date +%Y/%m)/$(date +%Y-%m-%d)_weibo_hotspot_report.html"
-            echo "✅ 报告已移动到: reports/$(date +%Y/%m)/$(date +%Y-%m-%d)_weibo_hotspot_report.html"
+            cp "$REPORT_FILE" "reports/$(date +%Y/%m)/$(date +%Y-%m-%d)_weibo_hotspot_report.html"
+            echo "✅ 报告已复制到: reports/$(date +%Y/%m)/$(date +%Y-%m-%d)_weibo_hotspot_report.html"
           else
             echo "❌ 未找到生成的报告文件"
             exit 1
@@ -70,9 +77,147 @@ jobs:
           git diff --staged --quiet || git commit -m "🤖 自动生成微博热搜报告 $(date +%Y-%m-%d)"
           git push
 
-      - name: 上传报告作为构建产物
-        uses: actions/upload-artifact@v4
+      # 部署到 GitHub Pages
+      - name: 准备 Pages 部署
+        run: |
+          mkdir -p pages
+          
+          # 复制最新报告到 pages 根目录（作为首页）
+          LATEST_REPORT=$(ls -t reports/*/*/*.html 2>/dev/null | head -1)
+          if [ -n "$LATEST_REPORT" ]; then
+            cp "$LATEST_REPORT" pages/index.html
+          fi
+          
+          # 复制所有历史报告
+          cp -r reports/* pages/ 2>/dev/null || true
+          
+          # 创建列表页
+          cat > pages/reports.html << 'HTMLEOF'
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微博热搜产品创意分析报告 - 历史报告</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #FF6B35, #FF8C42);
+            color: #2D3142;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 32px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+        }
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 16px;
+            color: #FF6B35;
+        }
+        .header p {
+            font-size: 16px;
+            color: #666;
+        }
+        .reports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .report-card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+        .report-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        }
+        .report-card h3 {
+            color: #FF6B35;
+            margin-bottom: 12px;
+            font-size: 18px;
+        }
+        .report-card a {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 8px 16px;
+            background: #FF6B35;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .report-card a:hover {
+            background: #FF8C42;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: white;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 微博热搜产品创意分析报告</h1>
+            <p>历史报告列表 - 每日自动更新</p>
+        </div>
+        <div class="reports-grid">
+HTMLEOF
+
+          # 列出所有报告
+          find pages -name "*.html" -type f ! -name "index.html" ! -name "reports.html" | sort -r | head -30 | while read report; do
+            filename=$(basename "$report" .html)
+            date=$(echo "$filename" | sed 's/_weibo_hotspot_report//')
+            
+            cat >> pages/reports.html << HTMLEOF
+            <div class="report-card">
+                <h3>📅 $date</h3>
+                <p>微博热搜产品创意分析报告</p>
+                <a href="$filename">查看报告 →</a>
+            </div>
+HTMLEOF
+          done
+          
+          cat >> pages/reports.html << 'HTMLEOF'
+        </div>
+        <div class="footer">
+            <p>自动生成时间: $(date '+%Y-%m-%d %H:%M:%S')</p>
+            <p>Powered by Claude AI & GitHub Actions</p>
+        </div>
+    </div>
+</body>
+</html>
+HTMLEOF
+
+      - name: 上传到 GitHub Pages
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: weibo-hotspot-report-${{ github.run_number }}
-          path: reports/${{ github.run_number }}/*.html
-          retention-days: 30
+          path: pages
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: weibo-analysis
+    
+    steps:
+      - name: 部署到 GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
